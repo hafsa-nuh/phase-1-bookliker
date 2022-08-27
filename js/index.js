@@ -4,20 +4,21 @@ document.addEventListener("DOMContentLoaded", () => {//Getting the list of books
   .then((bookInfo) => generateBookList(bookInfo));
 });
 
-const bookList = document.querySelector("#list");
-
-// creating a book list
+//creating a book list
+const bookList = document.getElementById("list");
 function generateBookList(books) {
-  const bookLI = document.createElement("li");
-  bookLI.textContent = books.title;
-  bookLI.id = books.id;
-  bookList.appendChild(bookLI);
+  for(let book of books){
+    const bookLI = document.createElement("li");
+    bookLI.textContent = book.title;
+    bookLI.id = book.id;
+    bookList.appendChild(bookLI);
 
-  bookLI.addEventListener("click", (event) => {showBook(event.target.id);});
+    bookLI.addEventListener("click", (event) => {showBook(event.target.id)});
+  }
 }
 
-// initiazing the book details
-const bookPanel = document.querySelector("#show-panel");
+//initiazing the book details
+const bookPanel = document.getElementById("show-panel");
 function showBook(bookID) {
   fetch(`http://localhost:3000/books/${bookID}`) 
   .then(resp => resp.json()) 
@@ -26,19 +27,25 @@ function showBook(bookID) {
 
     const bookImage = document.createElement("img");
     bookImage.src = bookInfo.img_url;
+    bookPanel.appendChild(bookImage);
 
     const bookTitle = document.createElement("p");
     bookTitle.innerHTML = "<strong>" + bookInfo.title + "</strong>";
+    bookPanel.appendChild(bookTitle);
 
     const bookAuthor = document.createElement("p");
     bookAuthor.innerHTML = "<strong>" + bookInfo.author + "</strong>";
-          
+    bookPanel.appendChild(bookAuthor);
+
     const bookDescription = document.createElement("p");
     bookDescription.textContent = bookInfo.description;
-   
+    bookPanel.appendChild(bookDescription);
+
     const likesList = document.createElement("ul");
-  
-    bookPanel.appendChild(bookImage, bookTitle, bookAuthor, bookDescription, likesList)
+    bookPanel.appendChild(likesList);
+
+    // bookPanel.appendChild(bookImage, bookTitle, bookAuthor, bookDescription, likesList)
+
 
     for(user of bookInfo.users) {
       const likeUser = document.createElement("li");
@@ -53,10 +60,10 @@ function showBook(bookID) {
 
     likeButton.addEventListener("click", (event) => {  //First we are getting the list of people who like the given book:
       fetch(`http://localhost:3000/books/${event.target.id}`) 
-      .then(resp => resp.json()) 
+      .then((result) => result.json()) 
       .then((selectedBookInfo) => { //Then we are getting a list of all users:
         fetch("http://localhost:3000/users")
-        .then(response => response.json())
+        .then((response) => response.json())
         .then((users) => {
           const randomUser = Math.floor(Math.random() * users.length);
           const currentUser = users[randomUser];
@@ -82,7 +89,7 @@ function showBook(bookID) {
                 "users": selectedBookInfo.users 
               })
             }
-            
+
             fetch(fetchURL, configurationObject) 
             .then((response) => response.json())
             .then(showBook(event.target.id));
